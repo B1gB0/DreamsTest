@@ -56,6 +56,7 @@ DI-контейнеры, синглтоны и `GameManager.Instance` не ис�
 - `com.unity.purchasing` 5.4.4
 - TextMeshPro / стандартный Unity UI
 - `nunit.framework` через Unity Test Framework
+- AppMetrica (опционально, через `APPMETRICA_ENABLED` — реальный SDK не подключён)
 
 ## Тесты
 
@@ -77,7 +78,8 @@ DI-контейнеры, синглтоны и `GameManager.Instance` не ис�
 - Async-операции используют `Task` вместо UniTask. Для тестового проекта это
   оправдано; в production можно рассмотреть UniTask.
 - Firebase Remote Config не подключён.
-- AppMetrica/Firebase Analytics не подключены; используется Console-провайдер.
+- AppMetrica SDK не подключён физически, но архитектура готова: см. `AppMetricaProvider`
+  с условной компиляцией `APPMETRICA_ENABLED`.
 - Профилирование Android build не проводилось.
 - Сцену `Assets/_Project/Scenes/Main.unity` необходимо проверить в Unity Editor:
   в рабочем дереве она отсутствует.

@@ -273,9 +273,9 @@ namespace Game.Tests.PlayMode
             _iapService = iapService;
         }
 
-        protected override IAnalyticsProvider CreateAnalyticsProvider()
+        protected override IAnalyticsProvider[] CreateAnalyticsProviders()
         {
-            return _analyticsProvider;
+            return new[] { _analyticsProvider };
         }
 
         protected override IStorageService CreateStorageService()

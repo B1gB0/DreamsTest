@@ -52,8 +52,8 @@ namespace Game.Core
 
             try
             {
-                var analyticsProvider = CreateAnalyticsProvider();
-                _analytics = new AnalyticsService(new[] { analyticsProvider });
+                IAnalyticsProvider[] providers = CreateAnalyticsProviders();
+                _analytics = new AnalyticsService(providers);
                 _storage = CreateStorageService();
 
                 bool hasSave = _storage.Has("save");
@@ -119,9 +119,13 @@ namespace Game.Core
             }
         }
 
-        protected virtual IAnalyticsProvider CreateAnalyticsProvider()
+        protected virtual IAnalyticsProvider[] CreateAnalyticsProviders()
         {
-            return new ConsoleAnalyticsProvider();
+            return new IAnalyticsProvider[]
+            {
+                new ConsoleAnalyticsProvider(),
+                new AppMetricaProvider("test-api-key")
+            };
         }
 
         protected virtual IStorageService CreateStorageService()
