@@ -60,6 +60,7 @@ DI-контейнеры, синглтоны и `GameManager.Instance` не ис�
 ## Тесты
 
 Добавлено 18 EditMode-тестов для стоимости, offline-дохода, экономики и Boost.
+Дополнительно добавлены PlayMode-тесты для `GameBootstrap`, экономики и UI.
 
 Запуск:
 
@@ -96,7 +97,6 @@ Android build на реальном устройстве не тестирова
 
 - Firebase Remote Config.
 - Реальный Analytics Provider.
-- PlayMode-тесты.
 - Финальная проверка/подключение сцены `Main.unity`.
 
 ## Следующий шаг

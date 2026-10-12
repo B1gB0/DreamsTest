@@ -52,9 +52,9 @@ namespace Game.Core
 
             try
             {
-                var analyticsProvider = new ConsoleAnalyticsProvider();
+                var analyticsProvider = CreateAnalyticsProvider();
                 _analytics = new AnalyticsService(new[] { analyticsProvider });
-                _storage = new JsonFileStorageService();
+                _storage = CreateStorageService();
 
                 bool hasSave = _storage.Has("save");
                 _saveData = hasSave
@@ -84,7 +84,7 @@ namespace Game.Core
                 _lastExitTimeUtc = _saveData.LastExitTimeUtc;
                 ApplyOfflineIncome(_lastExitTimeUtc);
 
-                _iap = new UnityIAPService();
+                _iap = CreateIAPService();
                 bool iapInitialized;
                 try
                 {
@@ -117,6 +117,21 @@ namespace Game.Core
             {
                 Debug.LogException(exception);
             }
+        }
+
+        protected virtual IAnalyticsProvider CreateAnalyticsProvider()
+        {
+            return new ConsoleAnalyticsProvider();
+        }
+
+        protected virtual IStorageService CreateStorageService()
+        {
+            return new JsonFileStorageService();
+        }
+
+        protected virtual IIAPService CreateIAPService()
+        {
+            return new UnityIAPService();
         }
 
         private void Update()

@@ -1,22 +1,20 @@
 {
-    "name": "Game.Tests.EditMode",
-    "rootNamespace": "",
-    "references": [
-        "Game.Runtime",
-        "UnityEditor.TestRunner",
-        "UnityEngine.TestRunner"
-    ],
-    "includePlatforms": [
-        "Editor"
-    ],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": true,
-    "precompiledReferences": [
-        "nunit.framework.dll"
-    ],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "Game.Tests.EditMode",
+  "rootNamespace": "",
+  "references": [
+    "Game.Runtime",
+    "nunit.framework"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "testAssemblies": true
 }
