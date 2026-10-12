@@ -830,6 +830,7 @@ PlayerSettings:
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
+    Android: SENTIS_ANALYTICS_ENABLED;APP_UI_EDITOR_ONLY
     Standalone: SENTIS_ANALYTICS_ENABLED;APP_UI_EDITOR_ONLY
   additionalCompilerArguments: {}
   platformArchitecture: {}
@@ -907,7 +908,8 @@ PlayerSettings:
   XboxOneOverrideIdentityName: 
   XboxOneOverrideIdentityPublisher: 
   vrEditorSettings: {}
-  cloudServicesEnabled: {}
+  cloudServicesEnabled:
+    Purchasing: 1
   luminIcon:
     m_Name: 
     m_ModelFolderPath: 

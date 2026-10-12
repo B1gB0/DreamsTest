@@ -24,6 +24,9 @@ namespace Game.Core
         [SerializeField]
         private BalanceView _balanceView;
 
+        [SerializeField]
+        private IAPView _iapView;
+
         private AnalyticsService _analytics;
         private IStorageService _storage;
         private IIAPService _iap;
@@ -97,6 +100,8 @@ namespace Game.Core
                 {
                     _analytics.LogEvent("iap_unavailable");
                 }
+
+                _iapView?.Initialize(_iap, _config);
 
                 _iap.OnPurchaseSuccess += OnPurchaseSuccess;
                 _iap.OnPurchaseFailed += OnPurchaseFailed;
