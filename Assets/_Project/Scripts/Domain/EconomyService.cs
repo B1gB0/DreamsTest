@@ -4,11 +4,6 @@ using System.Linq;
 
 namespace Game.Domain
 {
-    public interface IGameConfig
-    {
-        // Will be implemented in the next stage
-    }
-
     public class EconomyService
     {
         private double _balance;
