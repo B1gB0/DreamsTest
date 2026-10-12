@@ -31,6 +31,7 @@ namespace Game.Core
         private BoostService _boost;
         private SaveData _saveData;
         private string _lastExitTimeUtc;
+        private DateTime _pauseStartedUtc;
         private bool _isInitialized;
 
         private void Start()
@@ -73,6 +74,9 @@ namespace Game.Core
                     _config.BoostDurationSeconds,
                     _config.BoostMultiplier,
                     _config.BoostEnabled);
+                
+                _boost.BoostStarted += OnBoostStarted;
+                _boost.BoostFinished += OnBoostFinished;
 
                 _lastExitTimeUtc = _saveData.LastExitTimeUtc;
                 ApplyOfflineIncome(_lastExitTimeUtc);
@@ -121,6 +125,21 @@ namespace Game.Core
             _boost.Tick(Time.deltaTime);
         }
 
+        private void OnDestroy()
+        {
+            if (_boost != null)
+            {
+                _boost.BoostStarted -= OnBoostStarted;
+                _boost.BoostFinished -= OnBoostFinished;
+            }
+
+            if (_iap != null)
+            {
+                _iap.OnPurchaseSuccess -= OnPurchaseSuccess;
+                _iap.OnPurchaseFailed -= OnPurchaseFailed;
+            }
+        }
+
         private void OnApplicationPause(bool paused)
         {
             if (!_isInitialized)
@@ -130,8 +149,16 @@ namespace Game.Core
 
             if (paused)
             {
+                _pauseStartedUtc = DateTime.UtcNow;
                 Save();
                 return;
+            }
+
+            if (_pauseStartedUtc != default)
+            {
+                float elapsed = (float)(DateTime.UtcNow - _pauseStartedUtc).TotalSeconds;
+                _boost.Tick(elapsed);
+                _pauseStartedUtc = default;
             }
 
             ApplyOfflineIncome(_lastExitTimeUtc);
@@ -192,6 +219,18 @@ namespace Game.Core
         private void OnPurchaseFailed(string productId, string reason)
         {
             _analytics.LogPurchaseFailed(productId, reason);
+        }
+
+        private void OnBoostStarted()
+        {
+            _analytics.LogBoostStarted(
+                _config.BoostDurationSeconds,
+                _config.BoostMultiplier);
+        }
+
+        private void OnBoostFinished()
+        {
+            _analytics.LogBoostFinished();
         }
     }
 }
