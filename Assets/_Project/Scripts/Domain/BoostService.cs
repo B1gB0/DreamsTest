@@ -29,6 +29,8 @@ namespace Game.Domain
             private set => _remainingSeconds = value; 
         }
 
+        public string LastActivationUtc { get; private set; }
+
         public event Action BoostStarted;
         public event Action BoostFinished;
 
@@ -39,6 +41,7 @@ namespace Game.Domain
             _enabled = enabled;
             _isActive = false;
             _remainingSeconds = 0f;
+            LastActivationUtc = string.Empty;
         }
 
         public bool TryActivate()
@@ -48,6 +51,7 @@ namespace Game.Domain
 
             IsActive = true;
             RemainingSeconds = _duration;
+            LastActivationUtc = DateTime.UtcNow.ToString("o");
             return true;
         }
 

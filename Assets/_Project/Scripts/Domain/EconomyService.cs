@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Game.Services.Storage;
 
 namespace Game.Domain
 {
@@ -36,11 +37,75 @@ namespace Game.Domain
         public event Action<double> BalanceChanged;
         public event Action<MachineModel> MachineUnlocked;
         public event Action<MachineModel> MachineUpgraded;
+        public event Action<SaveData> StateChanged;
 
         public EconomyService(IGameConfig config)
+            : this(config, config?.Machines)
+        {
+        }
+
+        public EconomyService(IGameConfig config, IReadOnlyList<IMachineConfig> configs)
         {
             _balance = 0;
             _machines = new List<MachineModel>();
+
+            if (configs == null)
+            {
+                return;
+            }
+
+            foreach (IMachineConfig machineConfig in configs)
+            {
+                _machines.Add(new MachineModel(
+                    machineConfig,
+                    machineConfig.StartsUnlocked,
+                    1));
+            }
+        }
+
+        public SaveData ToSaveData()
+        {
+            var data = new SaveData
+            {
+                Balance = Balance,
+                MachineLevels = new int[_machines.Count],
+                MachineUnlocked = new bool[_machines.Count]
+            };
+
+            for (int index = 0; index < _machines.Count; index++)
+            {
+                data.MachineLevels[index] = _machines[index].Level;
+                data.MachineUnlocked[index] = _machines[index].IsUnlocked;
+            }
+
+            return data;
+        }
+
+        public void LoadFromSaveData(
+            SaveData data,
+            IReadOnlyList<IMachineConfig> configs)
+        {
+            if (data == null || configs == null)
+            {
+                return;
+            }
+
+            Balance = data.Balance;
+            _machines = new List<MachineModel>(configs.Count);
+
+            for (int index = 0; index < configs.Count; index++)
+            {
+                int level = data.MachineLevels != null && index < data.MachineLevels.Length
+                    ? data.MachineLevels[index]
+                    : 1;
+                bool isUnlocked = data.MachineUnlocked != null
+                    && index < data.MachineUnlocked.Length
+                    && data.MachineUnlocked[index];
+
+                _machines.Add(new MachineModel(configs[index], isUnlocked, level));
+            }
+
+            StateChanged?.Invoke(ToSaveData());
         }
 
         public bool TryAddCoins(double amount)

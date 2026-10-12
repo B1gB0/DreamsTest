@@ -75,6 +75,11 @@ namespace Game.Services.Analytics
             });
         }
 
+        public void LogEvent(string eventName, Dictionary<string, object> parameters = null)
+        {
+            Log(eventName, parameters ?? new Dictionary<string, object>());
+        }
+
         private void Log(string eventName, Dictionary<string, object> parameters)
         {
             foreach (IAnalyticsProvider provider in _providers)

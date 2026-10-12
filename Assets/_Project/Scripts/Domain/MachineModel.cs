@@ -29,6 +29,20 @@ namespace Game.Domain
             UpgradeCost = CostCalculator.GetUpgradeCost(BaseUpgradeCost, Level, UpgradeMultiplier);
         }
 
+        public MachineModel(IMachineConfig config, bool isUnlocked, int level)
+            : this(
+                config.Id,
+                config.BaseProduction,
+                config.UnlockCost,
+                config.BaseUpgradeCost,
+                config.UpgradeMultiplier)
+        {
+            IsUnlocked = isUnlocked;
+            Level = Math.Max(1, level);
+            ProductionPerSecond = _baseProductionPerSecond * Level;
+            UpgradeCost = CostCalculator.GetUpgradeCost(BaseUpgradeCost, Level, UpgradeMultiplier);
+        }
+
         public bool TryUnlock(ref double balance)
         {
             if (IsUnlocked || balance < UnlockCost)
