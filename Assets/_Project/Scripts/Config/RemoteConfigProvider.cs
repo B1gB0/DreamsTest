@@ -12,12 +12,6 @@ namespace Game.Config
 {
     /// <summary>
     /// Remote Config provider with local fallback.
-    /// To enable real Firebase Remote Config:
-    /// 1. Register project in Firebase Console.
-    /// 2. Download google-services.json to Assets/.
-    /// 3. Import FirebaseRemoteConfig.unitypackage.
-    /// 4. Add FIREBASE_REMOTE_CONFIG_ENABLED to Scripting Define Symbols.
-    /// Without the define, only the local GameConfigSO fallback is used.
     /// </summary>
     public sealed class RemoteConfigProvider : IGameConfig
     {
@@ -36,7 +30,6 @@ namespace Game.Config
             _fallback = fallback;
         }
 
-        // Machines are not overridden through Remote Config because they are complex.
         public IReadOnlyList<IMachineConfig> Machines => _fallback.Machines;
 
         public float BoostDurationSeconds =>
@@ -60,30 +53,47 @@ namespace Game.Config
         public async Task FetchAsync()
         {
 #if FIREBASE_REMOTE_CONFIG_ENABLED
-            var defaults = new Dictionary<string, object>
+            try
             {
-                { BoostDurationKey, _fallback.BoostDurationSeconds },
-                { BoostMultiplierKey, _fallback.BoostMultiplier },
-                { BoostEnabledKey, _fallback.BoostEnabled },
-                { MaxOfflineKey, _fallback.MaxOfflineSeconds },
-                { CoinsPackAmountKey, _fallback.CoinsPackAmount },
-                { CoinsPackProductIdKey, _fallback.CoinsPackProductId }
-            };
+                var defaults = new Dictionary<string, object>
+                {
+                    { BoostDurationKey, _fallback.BoostDurationSeconds },
+                    { BoostMultiplierKey, _fallback.BoostMultiplier },
+                    { BoostEnabledKey, _fallback.BoostEnabled },
+                    { MaxOfflineKey, _fallback.MaxOfflineSeconds },
+                    { CoinsPackAmountKey, _fallback.CoinsPackAmount },
+                    { CoinsPackProductIdKey, _fallback.CoinsPackProductId }
+                };
 
-            await FirebaseRemoteConfig.DefaultInstance.SetDefaultsAsync(defaults);
-            await FirebaseRemoteConfig.DefaultInstance.FetchAsync(System.TimeSpan.Zero);
-            await FirebaseRemoteConfig.DefaultInstance.ActivateAsync();
+                await FirebaseRemoteConfig.DefaultInstance.SetDefaultsAsync(defaults);
+                await FirebaseRemoteConfig.DefaultInstance.FetchAsync(System.TimeSpan.Zero);
+                await FirebaseRemoteConfig.DefaultInstance.ActivateAsync();
 
-            // Read activated values and cache them locally.
-            var config = FirebaseRemoteConfig.DefaultInstance;
-            _remoteValues[BoostDurationKey] = (float)config.GetValue(BoostDurationKey).DoubleValue;
-            _remoteValues[BoostMultiplierKey] = (float)config.GetValue(BoostMultiplierKey).DoubleValue;
-            _remoteValues[BoostEnabledKey] = config.GetValue(BoostEnabledKey).BooleanValue;
-            _remoteValues[MaxOfflineKey] = (int)config.GetValue(MaxOfflineKey).LongValue;
-            _remoteValues[CoinsPackAmountKey] = (int)config.GetValue(CoinsPackAmountKey).LongValue;
-            _remoteValues[CoinsPackProductIdKey] = config.GetValue(CoinsPackProductIdKey).StringValue;
+                var config = FirebaseRemoteConfig.DefaultInstance;
+                _remoteValues[BoostDurationKey] =
+                    (float)config.GetValue(BoostDurationKey).DoubleValue;
+                _remoteValues[BoostMultiplierKey] =
+                    (float)config.GetValue(BoostMultiplierKey).DoubleValue;
+                _remoteValues[BoostEnabledKey] =
+                    config.GetValue(BoostEnabledKey).BooleanValue;
+                _remoteValues[MaxOfflineKey] =
+                    (int)config.GetValue(MaxOfflineKey).LongValue;
+                _remoteValues[CoinsPackAmountKey] =
+                    (int)config.GetValue(CoinsPackAmountKey).LongValue;
+                _remoteValues[CoinsPackProductIdKey] =
+                    config.GetValue(CoinsPackProductIdKey).StringValue;
 
-            Debug.Log($"[RemoteConfig] Firebase fetch completed. Status: {config.Info.LastFetchStatus}");
+                Debug.Log(
+                    $"[RemoteConfig] Firebase fetch completed. " +
+                    $"Status: {config.Info.LastFetchStatus}");
+            }
+            catch (System.Exception exception)
+            {
+                _remoteValues.Clear();
+                Debug.LogWarning(
+                    $"[RemoteConfig] Firebase initialization/fetch failed: " +
+                    $"{exception.Message}. Using local GameConfigSO fallback.");
+            }
 #else
             Debug.Log("[RemoteConfig] Firebase SDK not enabled. Using local GameConfigSO fallback.");
             await Task.CompletedTask;

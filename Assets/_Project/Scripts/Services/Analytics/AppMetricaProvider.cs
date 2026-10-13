@@ -1,5 +1,6 @@
-using System.Text;
+using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 #if APPMETRICA_ENABLED
@@ -10,47 +11,80 @@ namespace Game.Services.Analytics
 {
     /// <summary>
     /// Analytics provider for AppMetrica.
-    /// To enable real SDK integration:
-    /// 1. Download AppMetrica Unity SDK from https://appmetrica.yandex.ru/
-    /// 2. Import .unitypackage into the project.
-    /// 3. Add APPMETRICA_ENABLED to Scripting Define Symbols in Player Settings.
-    /// Without the define, this provider logs events via Debug.Log for verification.
+    /// If the API key is a placeholder or SDK fails to initialize,
+    /// the provider works in degraded mode: events are logged via Debug.Log only.
+    /// This prevents the whole game bootstrap from failing if AppMetrica is unavailable.
     /// </summary>
     public sealed class AppMetricaProvider : IAnalyticsProvider
     {
+        private const string PlaceholderKeyPrefix = "REPLACE_";
+
         public AppMetricaProvider(string apiKey)
         {
-#if APPMETRICA_ENABLED
-            AppMetrica.Activate(new AppMetricaConfig(apiKey));
-            IsInitialized = true;
-            Debug.Log($"[AppMetrica] Initialized with API key {apiKey.Substring(0, 4)}...");
-#else
             IsInitialized = false;
-            Debug.Log($"[AppMetrica] SDK not installed. Falling back to Debug.Log. Would use API key {apiKey.Substring(0, Mathf.Min(4, apiKey.Length))}...");
-#endif
-        }
-        
-        public bool IsInitialized { get; private set; }
 
-        public void LogEvent(
-            string eventName,
-            Dictionary<string, object> parameters)
-        {
-#if APPMETRICA_ENABLED
-            if (parameters == null || parameters.Count == 0)
+            if (string.IsNullOrEmpty(apiKey) ||
+                apiKey.StartsWith(PlaceholderKeyPrefix, StringComparison.Ordinal))
             {
-                AppMetrica.ReportEvent(eventName);
+                Debug.LogWarning(
+                    "[AppMetrica] API key is a placeholder. SDK not activated. " +
+                    "Events will be logged via Debug.Log only. " +
+                    "To enable real AppMetrica, replace the key in " +
+                    "GameBootstrap.AppMetricaApiKey.");
                 return;
             }
 
-            AppMetrica.ReportEvent(eventName, BuildEventJson(parameters));
+            try
+            {
+#if APPMETRICA_ENABLED
+                AppMetrica.Activate(new AppMetricaConfig(apiKey));
+                IsInitialized = true;
+                Debug.Log($"[AppMetrica] Initialized with API key {apiKey.Substring(0, 4)}...");
 #else
+                Debug.Log("[AppMetrica] SDK not enabled (APPMETRICA_ENABLED not defined).");
+#endif
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError(
+                    $"[AppMetrica] Failed to initialize: {exception.Message}. " +
+                    "Continuing in degraded mode.");
+                IsInitialized = false;
+            }
+        }
+
+        public bool IsInitialized { get; private set; }
+
+        public void LogEvent(string eventName, Dictionary<string, object> parameters)
+        {
+#if APPMETRICA_ENABLED
+            if (IsInitialized)
+            {
+                try
+                {
+                    if (parameters == null || parameters.Count == 0)
+                    {
+                        AppMetrica.ReportEvent(eventName);
+                    }
+                    else
+                    {
+                        AppMetrica.ReportEvent(eventName, BuildEventJson(parameters));
+                    }
+
+                    return;
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogError(
+                        $"[AppMetrica] Failed to log event '{eventName}': " +
+                        $"{exception.Message}");
+                }
+            }
+#endif
             string paramsText = parameters == null || parameters.Count == 0
                 ? "{}"
                 : string.Join(", ", parameters);
-
-            Debug.Log($"[AppMetrica/Stub] {eventName} {{{paramsText}}}");
-#endif
+            Debug.Log($"[AppMetrica/Degraded] {eventName} {{{paramsText}}}");
         }
 
 #if APPMETRICA_ENABLED
