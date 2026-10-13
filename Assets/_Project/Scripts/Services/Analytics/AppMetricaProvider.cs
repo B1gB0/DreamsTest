@@ -25,7 +25,7 @@ namespace Game.Services.Analytics
             IsInitialized = true;
             Debug.Log($"[AppMetrica] Initialized with API key {apiKey.Substring(0, 4)}...");
 #else
-            _isInitialized = false;
+            IsInitialized = false;
             Debug.Log($"[AppMetrica] SDK not installed. Falling back to Debug.Log. Would use API key {apiKey.Substring(0, Mathf.Min(4, apiKey.Length))}...");
 #endif
         }

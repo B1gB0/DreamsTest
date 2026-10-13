@@ -115,3 +115,6 @@ InitTestScene*.unity*
 
 # Rider
 .idea/
+
+# Rider-generated
+GvhProjectSettings.xml
