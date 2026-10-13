@@ -12,6 +12,9 @@ namespace Game.Core
 {
     public class GameBootstrap : MonoBehaviour
     {
+        // Get the production API key in the AppMetrica dashboard: App settings > API key.
+        private const string AppMetricaApiKey = "REPLACE_WITH_APP_METRICA_API_KEY";
+
         [SerializeField]
         private GameConfigSO _config;
 
@@ -124,7 +127,7 @@ namespace Game.Core
             return new IAnalyticsProvider[]
             {
                 new ConsoleAnalyticsProvider(),
-                new AppMetricaProvider("test-api-key")
+                new AppMetricaProvider(AppMetricaApiKey)
             };
         }
 

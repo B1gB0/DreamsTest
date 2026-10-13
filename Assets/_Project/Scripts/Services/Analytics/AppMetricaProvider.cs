@@ -1,3 +1,4 @@
+using System.Text;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,19 +18,19 @@ namespace Game.Services.Analytics
     /// </summary>
     public sealed class AppMetricaProvider : IAnalyticsProvider
     {
-        private readonly bool _isInitialized;
-
         public AppMetricaProvider(string apiKey)
         {
 #if APPMETRICA_ENABLED
             AppMetrica.Activate(new AppMetricaConfig(apiKey));
-            _isInitialized = true;
+            IsInitialized = true;
             Debug.Log($"[AppMetrica] Initialized with API key {apiKey.Substring(0, 4)}...");
 #else
             _isInitialized = false;
             Debug.Log($"[AppMetrica] SDK not installed. Falling back to Debug.Log. Would use API key {apiKey.Substring(0, Mathf.Min(4, apiKey.Length))}...");
 #endif
         }
+        
+        public bool IsInitialized { get; private set; }
 
         public void LogEvent(
             string eventName,
@@ -42,13 +43,7 @@ namespace Game.Services.Analytics
                 return;
             }
 
-            var json = new Dictionary<string, object>();
-            foreach (var pair in parameters)
-            {
-                json[pair.Key] = pair.Value?.ToString() ?? string.Empty;
-            }
-
-            AppMetrica.ReportEvent(eventName, json);
+            AppMetrica.ReportEvent(eventName, BuildEventJson(parameters));
 #else
             string paramsText = parameters == null || parameters.Count == 0
                 ? "{}"
@@ -57,5 +52,41 @@ namespace Game.Services.Analytics
             Debug.Log($"[AppMetrica/Stub] {eventName} {{{paramsText}}}");
 #endif
         }
+
+#if APPMETRICA_ENABLED
+        private static string BuildEventJson(Dictionary<string, object> parameters)
+        {
+            var builder = new StringBuilder("{");
+            bool isFirst = true;
+
+            foreach (var pair in parameters)
+            {
+                if (!isFirst)
+                {
+                    builder.Append(',');
+                }
+
+                builder.Append('"');
+                builder.Append(EscapeJson(pair.Key));
+                builder.Append("\":\"");
+                builder.Append(EscapeJson(pair.Value?.ToString() ?? string.Empty));
+                builder.Append('"');
+                isFirst = false;
+            }
+
+            builder.Append('}');
+            return builder.ToString();
+        }
+
+        private static string EscapeJson(string value)
+        {
+            return value
+                .Replace("\\", "\\\\")
+                .Replace("\"", "\\\"")
+                .Replace("\n", "\\n")
+                .Replace("\r", "\\r")
+                .Replace("\t", "\\t");
+        }
+#endif
     }
 }
