@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "571162972351",
+    "project_id": "dreamstest-2f57c",
+    "storage_bucket": "dreamstest-2f57c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:571162972351:android:b8e0dcf10f20316e89760a",
+        "android_client_info": {
+          "package_name": "com.UnityTechnologies.com.unity.template.urpblank"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCE3riUi0aaOCr8QV7EZ85PrPcsM62Ebjk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

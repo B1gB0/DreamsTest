@@ -57,9 +57,15 @@ namespace Game.Core
 
             try
             {
-                var remoteConfig = new RemoteConfigProvider(_config);
-                await remoteConfig.FetchAsync();
-                _runtimeConfig = remoteConfig;
+                _runtimeConfig = CreateRuntimeConfig(_config);
+                if (_runtimeConfig is RemoteConfigProvider remoteConfig)
+                {
+                    await remoteConfig.FetchAsync();
+                    if (this == null)
+                    {
+                        return;
+                    }
+                }
 
                 IAnalyticsProvider[] providers = CreateAnalyticsProviders();
                 _analytics = new AnalyticsService(providers);
@@ -110,14 +116,28 @@ namespace Game.Core
                     _analytics.LogEvent("iap_unavailable");
                 }
 
-                _iapView?.Initialize(_iap, _runtimeConfig);
+                if (_iapView != null)
+                {
+                    _iapView.Initialize(_iap, _runtimeConfig);
+                }
 
                 _iap.OnPurchaseSuccess += OnPurchaseSuccess;
                 _iap.OnPurchaseFailed += OnPurchaseFailed;
 
-                _factoryView?.Initialize(_economy, _runtimeConfig);
-                _boostView?.Initialize(_boost, _runtimeConfig);
-                _balanceView?.Initialize(_economy);
+                if (_factoryView != null)
+                {
+                    _factoryView.Initialize(_economy, _runtimeConfig);
+                }
+
+                if (_boostView != null)
+                {
+                    _boostView.Initialize(_boost, _runtimeConfig);
+                }
+
+                if (_balanceView != null)
+                {
+                    _balanceView.Initialize(_economy);
+                }
 
                 _isInitialized = true;
                 _analytics.LogGameStarted();
@@ -133,8 +153,14 @@ namespace Game.Core
             return new IAnalyticsProvider[]
             {
                 new ConsoleAnalyticsProvider(),
-                new AppMetricaProvider(AppMetricaApiKey)
+                new AppMetricaProvider(AppMetricaApiKey),
+                new FirebaseAnalyticsProvider()
             };
+        }
+
+        protected virtual IGameConfig CreateRuntimeConfig(GameConfigSO config)
+        {
+            return new RemoteConfigProvider(config);
         }
 
         protected virtual IStorageService CreateStorageService()

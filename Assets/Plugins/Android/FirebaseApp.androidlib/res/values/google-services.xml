@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@string/gcm_defaultSenderId,@string/google_storage_bucket,@string/project_id,@string/google_api_key,@string/google_crash_reporting_api_key,@string/google_app_id">
+  <string name="gcm_defaultSenderId" translatable="false">571162972351</string>
+  <string name="google_storage_bucket" translatable="false">dreamstest-2f57c.firebasestorage.app</string>
+  <string name="project_id" translatable="false">dreamstest-2f57c</string>
+  <string name="google_api_key" translatable="false">AIzaSyCE3riUi0aaOCr8QV7EZ85PrPcsM62Ebjk</string>
+  <string name="google_crash_reporting_api_key" translatable="false">AIzaSyCE3riUi0aaOCr8QV7EZ85PrPcsM62Ebjk</string>
+  <string name="google_app_id" translatable="false">1:571162972351:android:b8e0dcf10f20316e89760a</string>
+</resources>

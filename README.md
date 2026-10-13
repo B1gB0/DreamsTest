@@ -57,6 +57,7 @@ DI-контейнеры, синглтоны и `GameManager.Instance` не ис�
 - TextMeshPro / стандартный Unity UI
 - `nunit.framework` через Unity Test Framework
 - AppMetrica (опционально, через `APPMETRICA_ENABLED` — реальный SDK не подключён)
+- Firebase Analytics (опционально, через `FIREBASE_ANALYTICS_ENABLED`)
 - Firebase Remote Config (опционально, через `FIREBASE_REMOTE_CONFIG_ENABLED` — с fallback на `GameConfigSO`)
 
 ## Тесты

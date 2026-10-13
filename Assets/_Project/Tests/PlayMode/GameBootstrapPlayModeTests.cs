@@ -278,6 +278,11 @@ namespace Game.Tests.PlayMode
             return new[] { _analyticsProvider };
         }
 
+        protected override IGameConfig CreateRuntimeConfig(GameConfigSO config)
+        {
+            return config;
+        }
+
         protected override IStorageService CreateStorageService()
         {
             return _storageService;
