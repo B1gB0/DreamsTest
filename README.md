@@ -131,7 +131,10 @@ EditMode-тесты не создают MonoBehaviour/GameObject/ScriptableObjec
 
 ## Время работы
 
-~18 часов фактической работы, включая настройку окружения (Codex CLI, ProxyAPI, Git LFS, Firebase Console, AppMetrica SDK, EDM4U).
+- Обязательная часть: ~3–4 часа.
+- С дополнительными заданиями (PlayMode-тесты, AppMetrica, Firebase Remote Config, Firebase Analytics, Android build и профилирование): ~7–8 часов всего.
+
+Включает настройку окружения (Codex CLI через ProxyAPI, Git LFS, Firebase Console, AppMetrica через OpenUPM, EDM4U).
 
 ## Что можно улучшить
 
