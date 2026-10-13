@@ -57,6 +57,7 @@ DI-контейнеры, синглтоны и `GameManager.Instance` не ис�
 - TextMeshPro / стандартный Unity UI
 - `nunit.framework` через Unity Test Framework
 - AppMetrica (опционально, через `APPMETRICA_ENABLED` — реальный SDK не подключён)
+- Firebase Remote Config (опционально, через `FIREBASE_REMOTE_CONFIG_ENABLED` — с fallback на `GameConfigSO`)
 
 ## Тесты
 
@@ -77,7 +78,9 @@ DI-контейнеры, синглтоны и `GameManager.Instance` не ис�
 
 - Async-операции используют `Task` вместо UniTask. Для тестового проекта это
   оправдано; в production можно рассмотреть UniTask.
-- Firebase Remote Config не подключён.
+- Firebase Remote Config не подключён физически. Архитектура готова: `RemoteConfigProvider`
+  с fallback на локальный `GameConfigSO`. Для реального Firebase нужно добавить
+  `FIREBASE_REMOTE_CONFIG_ENABLED`.
 - AppMetrica SDK не подключён физически, но архитектура готова: см. `AppMetricaProvider`
   с условной компиляцией `APPMETRICA_ENABLED`.
 - Профилирование Android build не проводилось.

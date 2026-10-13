@@ -18,6 +18,8 @@ namespace Game.Core
         [SerializeField]
         private GameConfigSO _config;
 
+        private IGameConfig _runtimeConfig;
+
         [SerializeField]
         private FactoryView _factoryView;
 
@@ -55,6 +57,10 @@ namespace Game.Core
 
             try
             {
+                var remoteConfig = new RemoteConfigProvider(_config);
+                await remoteConfig.FetchAsync();
+                _runtimeConfig = remoteConfig;
+
                 IAnalyticsProvider[] providers = CreateAnalyticsProviders();
                 _analytics = new AnalyticsService(providers);
                 _storage = CreateStorageService();
@@ -62,24 +68,24 @@ namespace Game.Core
                 bool hasSave = _storage.Has("save");
                 _saveData = hasSave
                     ? _storage.Load<SaveData>("save")
-                    : SaveData.NewGame(_config.Machines.Count);
+                    : SaveData.NewGame(_runtimeConfig.Machines.Count);
 
                 if (_saveData == null)
                 {
-                    _saveData = SaveData.NewGame(_config.Machines.Count);
+                    _saveData = SaveData.NewGame(_runtimeConfig.Machines.Count);
                     hasSave = false;
                 }
 
-                _economy = new EconomyService(_config, _config.Machines);
+                _economy = new EconomyService(_runtimeConfig, _runtimeConfig.Machines);
                 if (hasSave)
                 {
-                    _economy.LoadFromSaveData(_saveData, _config.Machines);
+                    _economy.LoadFromSaveData(_saveData, _runtimeConfig.Machines);
                 }
 
                 _boost = new BoostService(
-                    _config.BoostDurationSeconds,
-                    _config.BoostMultiplier,
-                    _config.BoostEnabled);
+                    _runtimeConfig.BoostDurationSeconds,
+                    _runtimeConfig.BoostMultiplier,
+                    _runtimeConfig.BoostEnabled);
                 
                 _boost.BoostStarted += OnBoostStarted;
                 _boost.BoostFinished += OnBoostFinished;
@@ -104,13 +110,13 @@ namespace Game.Core
                     _analytics.LogEvent("iap_unavailable");
                 }
 
-                _iapView?.Initialize(_iap, _config);
+                _iapView?.Initialize(_iap, _runtimeConfig);
 
                 _iap.OnPurchaseSuccess += OnPurchaseSuccess;
                 _iap.OnPurchaseFailed += OnPurchaseFailed;
 
-                _factoryView?.Initialize(_economy, _config);
-                _boostView?.Initialize(_boost, _config);
+                _factoryView?.Initialize(_economy, _runtimeConfig);
+                _boostView?.Initialize(_boost, _runtimeConfig);
                 _balanceView?.Initialize(_economy);
 
                 _isInitialized = true;
@@ -225,7 +231,7 @@ namespace Game.Core
             OfflineIncome income = OfflineProgressCalculator.Calculate(
                 lastExitUtc,
                 _economy.TotalProductionPerSecond,
-                _config.MaxOfflineSeconds);
+                _runtimeConfig.MaxOfflineSeconds);
 
             if (income.Amount <= 0)
             {
@@ -239,7 +245,7 @@ namespace Game.Core
 
         private void OnPurchaseSuccess(string productId)
         {
-            _economy.TryAddCoins(_config.CoinsPackAmount);
+            _economy.TryAddCoins(_runtimeConfig.CoinsPackAmount);
             _analytics.LogPurchaseSucceeded(productId);
         }
 
@@ -251,8 +257,8 @@ namespace Game.Core
         private void OnBoostStarted()
         {
             _analytics.LogBoostStarted(
-                _config.BoostDurationSeconds,
-                _config.BoostMultiplier);
+                _runtimeConfig.BoostDurationSeconds,
+                _runtimeConfig.BoostMultiplier);
         }
 
         private void OnBoostFinished()
